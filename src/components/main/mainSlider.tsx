@@ -13,7 +13,6 @@ interface Iprops{
 }
 
 const MainSlider = (props:Iprops) => {
-    
     const NextArrow =(props:any)=>{
         const {onClick} = props;
         return(
