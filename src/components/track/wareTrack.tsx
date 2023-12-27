@@ -1,25 +1,53 @@
 'use client'
-import React, { useEffect } from 'react';
+// Import WaveSurfer
 import WaveSurfer from 'wavesurfer.js'
+import React, { useEffect, useRef, useState ,useMemo} from 'react';
+import { useSearchParams } from 'next/navigation';
+// WaveSurfer hook
+const useWavesurfer = (containerRef: any, options: any) => {
+  const [wavesurfer, setWavesurfer] = useState<any>(null)
+
+  // Initialize wavesurfer when the container mounts
+  // or any of the props change
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const ws = WaveSurfer.create({
+      ...options,
+      container: containerRef.current,
+    })
+
+    setWavesurfer(ws)
+
+    return () => {
+      ws.destroy()
+    }
+  }, [options, containerRef])
+
+  return wavesurfer
+}
+
+
 
 const WareTrack = () => {
-    useEffect(()=>{
-        const element =document.getElementById("audioTrack");
-        if( element){
-            const wavesurfer = WaveSurfer.create({
-                container: element,
-                waveColor: 'rgb(200, 0, 200)',
-                progressColor: 'rgb(100, 0, 100)',
-                url: '/audio/hoidanit.mp3',
-              })
+    const searchParams = useSearchParams();
+    const fileName = searchParams.get("audio");
+    const containerRef = useRef<HTMLDivElement>(null);
+    const optionsMemo = useMemo(()=>{
+        return {
+            container: containerRef.current,
+            waveColor: 'rgb(200, 0, 200)',
+            progressColor: 'rgb(100, 0, 100)',
+            url: `/api?audio=${fileName}`,
         }
-        
-    },[])
+    },[]);
+   
+    const wavesurfer = useWavesurfer(containerRef, optionsMemo)
+
     return (
         <>
-            <div
-            id="audioTrack"
-            >WareTrack</div>
+            <div ref={containerRef}
+            ></div>
         </>
     );
 };
