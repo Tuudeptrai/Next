@@ -1,6 +1,7 @@
 import * as React from 'react';
 import ThemeRegistry from '@/components/theme-registry/theme.registry';
 import AppHeader from '@/components/header/header';
+import AppFooter from '@/components/footer/footer';
 
 
 
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeRegistry>
         <AppHeader/>
             {children}
+        <AppFooter/>
         </ThemeRegistry>
       </body>
     </html>
