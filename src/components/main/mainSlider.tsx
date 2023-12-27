@@ -8,7 +8,11 @@ import Slider from "react-slick";
 import { Settings } from 'react-slick';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
-const MainSlider = () => {
+interface Iprops{
+    data:ITrackTop[]
+}
+
+const MainSlider = (props:Iprops) => {
     
     const NextArrow =(props:any)=>{
         const {onClick} = props;
@@ -92,71 +96,6 @@ const MainSlider = () => {
                 </div>
                 </Slider>
                 <Divider />
-                    <h2>Multy Track</h2>
-                <Slider {...settings}>
-                <div className='abc'>
-                    <h3>Track 1</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 2</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 3</h3>
-                </div >
-                <div className='abc'>
-                    <h3>Track 4</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 5</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 6</h3>
-                </div>
-            </Slider>
-             <Divider />
-                <h2>Multy Track</h2>
-            <Slider {...settings}>
-                <div className='abc'>
-                    <h3>Track 1</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 2</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 3</h3>
-                </div >
-                <div className='abc'>
-                    <h3>Track 4</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 5</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 6</h3>
-                </div>
-                </Slider>
-                <Divider />
-                <h2>Multy Track</h2>
-                    <Slider {...settings}>
-                <div className='abc'>
-                    <h3>Track 1</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 2</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 3</h3>
-                </div >
-                <div className='abc'>
-                    <h3>Track 4</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 5</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 6</h3>
-                </div>
-                    </Slider>
             </Box>
             
         </Container>
