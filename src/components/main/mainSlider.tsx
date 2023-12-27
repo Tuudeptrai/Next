@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import { Settings } from 'react-slick';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import Link from 'next/link';
 
 interface Iprops{
     data:ITrackTop[],
@@ -14,7 +15,7 @@ interface Iprops{
 }
 
 const MainSlider = (props:Iprops) => {
-    console.log('check data >>> ',props.data)
+    // console.log('check data >>> ',props.data)
     const {data, title} = props;
     const NextArrow =(props:any)=>{
         const {onClick} = props;
@@ -75,6 +76,10 @@ const MainSlider = (props:Iprops) => {
                     borderRadius:"5px",
                     height:150,
                     width:150
+                  },
+                  "a":{
+                    textDecoration:"unset",
+                    color:"black"
                   }
                 },
                 "h3": {
@@ -91,8 +96,11 @@ const MainSlider = (props:Iprops) => {
                         <div className="track" key={track._id}>
                          <img
                             src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track.imgUrl}`}/>
+                            <Link href={`/track/${track._id}`}>
                             <h4>{track.title}</h4>
                             <h5>{track.description}</h5>
+                            </Link>
+                            
                          </div>)})}
 
                 </Slider>
