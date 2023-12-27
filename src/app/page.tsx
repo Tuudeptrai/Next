@@ -1,8 +1,11 @@
+import AppHeader from "@/components/header/header";
 
 export default function HomePage() {
   return (
     <>
-    <div>hello world</div>
+    <div>
+     
+    </div>
     </>
   );
 }
