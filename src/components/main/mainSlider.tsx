@@ -9,10 +9,13 @@ import { Settings } from 'react-slick';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
 interface Iprops{
-    data:ITrackTop[]
+    data:ITrackTop[],
+    title:string
 }
 
 const MainSlider = (props:Iprops) => {
+    console.log('check data >>> ',props.data)
+    const {data, title} = props;
     const NextArrow =(props:any)=>{
         const {onClick} = props;
         return(
@@ -21,10 +24,11 @@ const MainSlider = (props:Iprops) => {
 
                             sx={{  position: "absolute",
                                    right: 0,
-                                   top: "43%",
+                                   top: "20%",
                                    zIndex: 2,
                                    minWidth: 30,
                                    width: 35,
+                                   backgroundColor:"#F2F2F2",
 
                             }}>
                                 <ChevronRight/>
@@ -39,10 +43,11 @@ const MainSlider = (props:Iprops) => {
 
                             sx={{  position: "absolute",
                                    left: 0,
-                                   top: "43%",
+                                   top: "20%",
                                    zIndex: 2,
                                    minWidth: 30,
                                    width: 35,
+                                   backgroundColor:"#F2F2F2",
 
                             }}> 
                             <ChevronLeft/>
@@ -53,8 +58,8 @@ const MainSlider = (props:Iprops) => {
         dots: false,
         infinite: true,
         speed: 500,
-        slidesToShow: 3,
-      slidesToScroll: 3,
+        slidesToShow: 6,
+      slidesToScroll: 6,
       nextArrow: <NextArrow />,
       prevArrow: <PrevArrow />
       };
@@ -63,8 +68,14 @@ const MainSlider = (props:Iprops) => {
             <Box
             sx = {{
                 margin: "0 50px",
-                ".abc": {
+                ".track": {
+                
                   padding: "0 10px",
+                  "img":{
+                    borderRadius:"5px",
+                    height:150,
+                    width:150
+                  }
                 },
                 "h3": {
                   border: "1px solid #ccc",
@@ -73,28 +84,20 @@ const MainSlider = (props:Iprops) => {
                 }
               }}
             >
-                <h2>Multy Track</h2>
+               <h2> {title} </h2>
                 <Slider {...settings}>
-                <div className='abc'>
-                    <h3>Track 1</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 2</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 3</h3>
-                </div >
-                <div className='abc'>
-                    <h3>Track 4</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 5</h3>
-                </div>
-                <div className='abc'>
-                    <h3>Track 6</h3>
-                </div>
+                    {data.map(track => {
+                         return (
+                        <div className="track" key={track._id}>
+                         <img
+                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track.imgUrl}`}/>
+                            <h4>{track.title}</h4>
+                            <h5>{track.description}</h5>
+                         </div>)})}
+
                 </Slider>
-                <Divider />
+                <Divider/>
+                
             </Box>
             
         </Container>

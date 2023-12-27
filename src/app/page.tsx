@@ -35,12 +35,15 @@ const party = await sendRequest<IBackendRes<ITrackTop[]>>({
     
     <div>
       <MainSlider
+      title={"Top Chill"}
       data={chill?.data??[]}
       />
       <MainSlider
+      title={"Top Workout"}
       data={workout?.data??[]}
       />
       <MainSlider
+      title={"Top Party"}
       data={party?.data??[]}
       />
     </div>
