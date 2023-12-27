@@ -8,6 +8,7 @@ import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 
 const AppFooter = () => {
+    // console.log('ssss',`${process.env.NEXT_PUBLIC_BACKEND_URL}/tracks/hoidanit.mp3`);
     const hasMounted = useHasMounted();
     if(!hasMounted) return (<></>);
     return (
@@ -16,7 +17,8 @@ const AppFooter = () => {
             <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0,backgroundColor:"#F2F2F2" }}>
             <Container sx={{display:"flex", gap:10}}>
                 <AudioPlayer
-                    src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/tracks/hoidanit.mp3` }
+                    
                     volume={0.5}
                     style={{boxShadow:"unset", backgroundColor:"#F2F2F2"}}
                 />
