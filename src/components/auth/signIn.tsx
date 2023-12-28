@@ -1,17 +1,23 @@
 'use client'
-import { Avatar, Box, Button, Divider, Grid, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Divider, Grid,  TextField, Typography } from "@mui/material";
 import LockIcon from '@mui/icons-material/Lock';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import Link from "next/link";
+import Snackbar from '@mui/material/Snackbar';
+import Alert, { AlertProps } from '@mui/material/Alert';
+
 
 const AuthSignIn = (props: any) => {
-
+    const [open, setOpen] = useState(false);
+    const [snack, setSnack] = useState("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -22,8 +28,14 @@ const AuthSignIn = (props: any) => {
     const [errorUsername, setErrorUsername] = useState<string>("");
     const [errorPassword, setErrorPassword] = useState<string>("");
 
-
-    const handleSubmit = () => {
+    const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setOpen(false);
+      };
+    const handleSubmit = async() => {
         setIsErrorUsername(false);
         setIsErrorPassword(false);
         setErrorUsername("");
@@ -40,7 +52,17 @@ const AuthSignIn = (props: any) => {
             return;
         }
         console.log(">>> check username: ", username, ' pass: ', password)
-        signIn("credentials");
+       const res = await signIn("credentials",{
+            username:username,
+            password:password,
+            redirect:false,
+        });
+        console.log('resresres',res);
+        if(res?.error){
+           
+            setSnack(res?.error);
+            setOpen(true);
+        }
     }
 
     return (
@@ -70,6 +92,18 @@ const AuthSignIn = (props: any) => {
                     }}
                 >
                     <div style={{ margin: "20px" }}>
+                    <Snackbar open={open} 
+                    autoHideDuration={2000}
+                     onClose={handleClose}
+                     anchorOrigin={{vertical:"top", horizontal:"center"}}
+                     >
+                        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+                        {snack}
+                        </Alert>
+                    </Snackbar>
+                        <Link href="/">
+                            <ArrowBackIcon/>
+                        </Link>
                         <Box sx={{
                             display: "flex",
                             justifyContent: "center",
@@ -101,6 +135,11 @@ const AuthSignIn = (props: any) => {
                         />
                         <TextField
                             onChange={(event) => setPassword(event.target.value)}
+                            onKeyDown={(e)=>{
+                                if(e.key==="Enter"){
+                                    console.log('enter')
+                                }
+                            }}
                             variant="outlined"
                             margin="normal"
                             required
