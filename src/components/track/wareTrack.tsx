@@ -7,6 +7,7 @@ import { WaveSurferOptions } from 'wavesurfer.js';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import './wave.scss';
+import { Tooltip } from "@mui/material";
 
 const WaveTrack = () => {
     const searchParams = useSearchParams()
@@ -215,7 +216,24 @@ const WaveTrack = () => {
                             {
                                 arrComments.map(item => {
                                     return (
-                                        <img
+                                        <Tooltip sx={{
+                                            visibility: "hidden",
+                                            width: "120px",
+                                            backgroundColor: "black",
+                                            color: "#fff",
+                                            textAlign: "center",
+                                            borderRadius: "6px",
+                                            padding: "5px 0",
+                                            position: "absolute",
+                                            zIndex: 1,
+                                            bottom: "150%",
+                                            left: "50%",
+                                            marginLeft:" -60px"
+                                        }} title={item.content} arrow>
+                                             <img
+                                            onPointerMove={(e) => {  const hover = hoverRef.current!;
+                                            hover.style.width = calLeft(item.moment+3)
+                                             }}
                                             key={item.id}
                                             style={{
                                                 height: 20, width: 20,
@@ -226,6 +244,8 @@ const WaveTrack = () => {
                                             }}
                                             src={item.avatar}
                                         />
+                                        </Tooltip>
+                                       
                                     )
                                 })
                             }
