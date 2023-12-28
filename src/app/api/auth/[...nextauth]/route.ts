@@ -50,10 +50,24 @@ export const authOptions: NextAuthOptions = {
 
   ],
   callbacks: {
-    async jwt({ token }) {
-      token.userRole = 'admin';
+    async jwt({ token, user, account, profile, trigger}) {
+      console.log('jwt',token, user, account, profile, trigger)
+      if(trigger === "signIn"&&account?.provider=="facebook"){
+        token.userRole = 'admin';
+        token.address = "hoi dan it"
+      }
+     
       return token;
     },
+    async session({session, token, user}) {
+      //@ts-ignore
+      session.address = token.address ;
+      //@ts-ignore
+      session.role = token.userRole;
+      //@ts-ignore
+      session.provider = "facebook";
+      return session;
+    }
   },
 };
 
