@@ -3,6 +3,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import GithubProvider from 'next-auth/providers/github';
 import CredentialsProvider from "next-auth/providers/credentials";
+import { sendRequest } from '@/utils/Api';
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -11,7 +12,7 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       // The name to display on the sign in form (e.g. "Sign in with...")
-      name: "Credentials",
+      name: "normal email",
       // `credentials` is used to generate a form on the sign in page.
       // You can specify which fields should be submitted, by adding keys to the `credentials` object.
       // e.g. domain, username, password, 2FA token, etc.
@@ -21,12 +22,20 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password", placeholder: "123456" }
       },
       async authorize(credentials, req) {
+        const res = await sendRequest<IBackendRes<Isession>>( {
+          url:"http://localhost:8000/api/v1/auth/login",
+          method:"POST",
+          body: {
+                  password:credentials?.password,
+                  username: credentials?.username,
+                }, 
+      })
         // Add logic here to look up the user from the credentials supplied
-        const user = { id: "1", name: "Hỏi Dân IT", email: "hoidanit@gmail.com" , image:"http://localhost:8000/images/Avatar.jpg"}
+        const user = res.data?.user;
 
-        if (user) {
+        if (res&&res.data) {
           // Any object returned will be saved in `user` property of the JWT
-          return user
+          return res.data as any
         } else {
           // If you return null then an error will be displayed advising the user to check their details.
           return null
@@ -52,20 +61,45 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account, profile, trigger}) {
       console.log('jwt',token, user, account, profile, trigger)
-      if(trigger === "signIn"&&account?.provider=="facebook"){
-        token.userRole = 'admin';
-        token.address = "hoi dan it"
+      if(trigger === "signIn"&&account?.provider!=="credentials"){
+        const res = await sendRequest<IBackendRes<Isession>>({
+          url:"http://localhost:8000/api/v1/auth/social-media",
+          method:"POST",
+          body: {
+                  type:account?.provider.toLocaleUpperCase(),
+                  username: user.email,
+                },   
+        })
+        if(res.data){
+          token.access_token = res.data.access_token;
+          token.refresh_token = res.data.refresh_token;
+          token.user = res.data.user;
+         }
+        token.user.image = profile?.image!;
+        token.user.role = 'ADMIN';
+        token.user.address = "hoi dan it";
       }
+      if(trigger === "signIn" &&account?.provider==="credentials"){
+          //@ts-ignore
+          token.access_token = user.access_token;
+          //@ts-ignore
+            token.refresh_token = user.refresh_token;
+            //@ts-ignore
+            token.user = user.user;
+            token.user.image = profile?.image!;
+        }
+       
+    
      
       return token;
     },
     async session({session, token, user}) {
+      session.access_token = token.access_token ;
+      session.refresh_token = token.refresh_token ;
+      session.user = token.user ;
+      // session.user.role = token.user.role;
       //@ts-ignore
-      session.address = token.address ;
-      //@ts-ignore
-      session.role = token.userRole;
-      //@ts-ignore
-      session.provider = "facebook";
+      session.image = token.user.image;
       return session;
     }
   },
