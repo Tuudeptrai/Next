@@ -15,9 +15,15 @@ const WareTrack = () => {
     const fileName = searchParams.get("audio");
     const containerRef = useRef<HTMLDivElement>(null);
     const optionsMemo = useMemo(():Omit<WaveSurferOptions,"container"> =>{
+        // Create a canvas gradient
+        const ctx = document.createElement('canvas').getContext('2d')!
+        const gradient = ctx.createLinearGradient(0, 0, 0, 150)
+        gradient.addColorStop(0, '#2f2f2f')
+        gradient.addColorStop(0.7, '#ccc')
+        gradient.addColorStop(1, 'rgb(0, 0, 0)')
         return {
-            waveColor: '#ccc',
-            progressColor: '#2d3c4d',
+            waveColor: gradient,
+            progressColor: 'orange',
             url: `/api?audio=${fileName}`,
             barWidth:3,
             
