@@ -9,14 +9,12 @@ const DetailTrack = (props:any) => {
     const search = searchParams.get("audio");
     console.log('check>>>',search) 
     return (
-        <>
-            <div>
+       
+          
             <Container sx={{ marginTop: '20px' }}>
             <WareTrack />
-            </Container>
-                
-            </div>
-        </>
+            </Container> 
+       
     );
 };
 
