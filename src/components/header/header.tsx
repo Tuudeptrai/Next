@@ -64,7 +64,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function AppHeader() {
   const { data: session } = useSession();
-  console.log('useSession', session);
+  // console.log('useSession', session);
   
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -197,7 +197,7 @@ export default function AppHeader() {
                 <>
                  <Link href={"/playlist"}>Play List</Link>
                 <Link href={"/like"}>Like</Link>
-                <Link href={"/upload"}>Upload</Link>
+                <Link href={"/track/upload"}>Upload</Link>
                 
                 <div onClick={handleProfileMenuOpen} style={{ textAlign:"center",width: 50, height: 50,borderRadius:"50%",backgroundPosition: "center",backgroundSize: "cover", backgroundColor:"green",backgroundImage: `url('${session?.user?.image ||""}')`}}>{session?.user?.name??session?.user?.role}</div>
                 {/* <Avatar onClick={handleProfileMenuOpen} } >o</Avatar> */}
