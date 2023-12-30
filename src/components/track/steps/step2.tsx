@@ -7,6 +7,9 @@ import { styled } from '@mui/material/styles';
 import { error } from 'console';
 import axios from 'axios';
 import { useSession ,SessionProvider } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/utils/toast/useToast';
+import { sendRequest } from '@/utils/Api';
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -60,8 +63,7 @@ function InputFileUpload(props:any) {
           const res= await axios.post('http://localhost:8000/api/v1/files/upload', formData,{
           headers: {
             'Authorization': `Bearer ${session?.access_token}`,
-            "target_type":"images",
-            delay:5000
+            "target_type":"images"
           },
          
         }
@@ -100,6 +102,9 @@ interface INewTrack{
 }
 
 const Step2 = (props:any) => {
+    const { data: session } = useSession();
+    const toast = useToast();
+    const router = useRouter();
     const [errortile, setErrortitle] = useState(false);
     const [errordescription, setErrordescription] = useState(false);
     const [info, setInfo] = useState<INewTrack>({
@@ -109,8 +114,34 @@ const Step2 = (props:any) => {
         imgUrl:"",
         category:""
     });
-    const handleSubmitForm =()=>{
-        console.log('handleSubmitForm',info)
+    const handleSubmitForm =async()=>{
+        const res = await sendRequest<IBackendRes<ITrackTop[]>>({
+            url:"http://localhost:8000/api/v1/tracks",
+            method:"POST",
+            headers: {
+                'Authorization': `Bearer ${session?.access_token}`,
+              },
+            body: {
+                title:info.title,
+                description:info.description,
+                trackUrl:info.trackUrl,
+                imgUrl:info.imgUrl,
+                category:info.category
+                  },   
+          })
+        console.log('handleSubmitForm res',res)
+        if(res.data){
+            
+            toast.success("success create track");
+            const timeoutId = setTimeout(() => {
+                router.push("/");
+              }, 2000);
+            
+        }else{
+            console.log('res error',res.message)
+            toast.error(res.message[0])
+        }
+        
     }
     const {trackUpload} = props;
     const category = [

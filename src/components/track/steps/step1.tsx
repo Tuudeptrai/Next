@@ -38,10 +38,10 @@ const Step1 = (props:any) => {
         }
       }
       );
-      props.setTrackUpload({
-        ...trackUpload,
+      props.setTrackUpload((prevState:any)=>({
+        ...prevState,
         tracksUrl:res?.data?.data?.fileName
-      });
+      }));
       console.log('>>>check acceptedFiles',res?.data?.data?.fileName);
        } catch (error) {
         //@ts-ignore
