@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FileWithPath, useDropzone } from 'react-dropzone';
 import "./theme.css";
 import Button from '@mui/material/Button';
@@ -9,11 +9,13 @@ import { useSession ,SessionProvider } from 'next-auth/react';
 import axios from 'axios';
 
 
-const Step1 = () => {
+const Step1 = (props:any) => {
   const { data: session } = useSession();
+  const {trackUpload} = props;
   const onDrop = useCallback(async(acceptedFiles: FileWithPath[])=> {
     // Do something with the files
     if(acceptedFiles&&acceptedFiles[0]){
+      props.setValue(1);
       const audio = acceptedFiles[0];
       const formData  = new FormData();
       formData.append("fileUpload", audio);
@@ -21,24 +23,30 @@ const Step1 = () => {
         const res= await axios.post('http://localhost:8000/api/v1/files/upload', formData,{
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
-          "target_type":"tracks"
+          "target_type":"tracks",
+          delay:5000
+        },
+        onUploadProgress: progressEvent => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total!);
+          console.log('percentCompleted',percentCompleted);
+          props.setTrackUpload({
+            ...trackUpload,
+            fileName:acceptedFiles[0].name,
+            percent:percentCompleted
+          });
+          
         }
+      }
+      );
+      props.setTrackUpload({
+        ...trackUpload,
+        tracksUrl:res?.data?.data?.fileName
       });
       console.log('>>>check acceptedFiles',res?.data?.data?.fileName);
        } catch (error) {
         //@ts-ignore
         console.log('>>>check acceptedFiles',error?.response?.data?.message);
        }
-      
-      // const chill = await sendRequestFile<IBackendRes<ITrackTop[]>>({
-      //   url:"http://localhost:8000/api/v1/files/upload",
-      //   method:"POST",
-      //   body: formData, 
-      //   headers: {
-      //           'Authorization': `Bearer ${session?.access_token}`,
-      //           "target_type":"tracks"
-      //         },  
-      // })
       
     }
    

@@ -66,4 +66,8 @@ declare global {
           "image":string
         }
     }
+    interface ItrackUpload{
+        fileName:string,
+        percent:number
+    }
 }

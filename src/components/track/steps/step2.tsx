@@ -1,8 +1,12 @@
+'use client'
 import { Box, Button, Grid, MenuItem, TextField, Typography } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
+import { error } from 'console';
+import axios from 'axios';
+import { useSession ,SessionProvider } from 'next-auth/react';
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -17,21 +21,21 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
         </Box>
     );
 }
-function LinearWithValueLabel() {
+function LinearWithValueLabel(props:any) {
     const [progress, setProgress] = React.useState(10);
 
-    React.useEffect(() => {
-        const timer = setInterval(() => {
-            setProgress((prevProgress) => (prevProgress >= 100 ? 10 : prevProgress + 10));
-        }, 800);
-        return () => {
-            clearInterval(timer);
-        };
-    }, []);
+    // React.useEffect(() => {
+    //     const timer = setInterval(() => {
+    //         setProgress((prevProgress) => (prevProgress >= 100 ? 10 : prevProgress + 10));
+    //     }, 800);
+    //     return () => {
+    //         clearInterval(timer);
+    //     };
+    // }, []);
 
     return (
         <Box sx={{ width: '100%' }}>
-            <LinearProgressWithLabel value={progress} />
+            <LinearProgressWithLabel value={props.percent} />
         </Box>
     );
 }
@@ -47,19 +51,68 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-function InputFileUpload() {
+function InputFileUpload(props:any) {
+    const { data: session } = useSession();
+    const handleUploadImage = async (image:any)=>{
+        const formData  = new FormData();
+        formData.append("fileUpload", image);
+         try {
+          const res= await axios.post('http://localhost:8000/api/v1/files/upload', formData,{
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            "target_type":"images",
+            delay:5000
+          },
+         
+        }
+        );
+        props.setInfo({
+          ...props.info,
+          imgUrl:res?.data?.data?.fileName
+        });
+        console.log('>>>check acceptedFiles',res?.data?.data?.fileName);
+         } catch (error) {
+          //@ts-ignore
+          console.log('>>>check acceptedFiles',error?.response?.data?.message);
+         }
+    }
     return (
         <Button
-            onClick={(e) => e.preventDefault()}
+            onChange={(e) => {  
+                const event = e.target as HTMLInputElement;
+                if(event.files) {
+                    handleUploadImage(event.files[0])
+                    console.log("evt.target.files: ", event.files[0])
+                }
+            }}
             component="label" variant="contained" startIcon={<CloudUploadIcon />}>
             Upload file
             <VisuallyHiddenInput type="file" />
         </Button>
     );
 }
+interface INewTrack{
+    title:string,
+    description:string,
+    trackUrl:string,
+    imgUrl:string,
+    category:string
+}
 
-const Step2 = () => {
-   
+const Step2 = (props:any) => {
+    const [errortile, setErrortitle] = useState(false);
+    const [errordescription, setErrordescription] = useState(false);
+    const [info, setInfo] = useState<INewTrack>({
+        title:"",
+        description:"",
+        trackUrl:"",
+        imgUrl:"",
+        category:""
+    });
+    const handleSubmitForm =()=>{
+        console.log('handleSubmitForm',info)
+    }
+    const {trackUpload} = props;
     const category = [
         {
             value: 'CHILL',
@@ -74,15 +127,23 @@ const Step2 = () => {
             label: 'PARTY',
         }
     ];
-
-
+    useEffect(()=>{
+        if(trackUpload&&trackUpload.tracksUrl){
+            console.log('trackUpload',trackUpload)
+            setInfo({
+                ...info,
+                trackUrl:trackUpload.tracksUrl
+            })
+        }
+    },[trackUpload])
+    console.log('info',info);
     return (
         <>
             <div>
                         <div>
-                            Your uploading track:
+                            {trackUpload.fileName}
                         </div>
-                        <LinearWithValueLabel />
+                        <LinearWithValueLabel percent={trackUpload.percent}/>
                     </div>
 
                     <Grid container spacing={2} mt={5}>
@@ -97,23 +158,53 @@ const Step2 = () => {
                         >
                             <div style={{ height: 250, width: 250, background: "#ccc" }}>
                                 <div>
-
+                                    {info.imgUrl &&
+                                    <img src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${info.imgUrl}`} width={250} height={250}/>
+                                    }
                                 </div>
 
                             </div>
                             <div >
-                                <InputFileUpload />
+                                <InputFileUpload info={info} setInfo={setInfo}/>
                             </div>
 
                         </Grid>
                         <Grid item xs={6} md={8}>
-                            <TextField id="standard-basic" label="Title" variant="standard" fullWidth margin="dense" />
-                            <TextField id="standard-basic" label="Description" variant="standard" fullWidth margin="dense" />
+                            <TextField  
+                             required
+                             error={errortile}
+                             helperText={errortile ? 'title cannot be empty' : ''}
+                                value={info?.title}
+                                onChange={(e)=>{
+                                    setInfo({
+                                        ...info, title:e.target.value
+                                    })
+                                    setErrortitle(e.target.value.trim() === '');
+                                   }}
+                                label="Title" variant="standard" fullWidth margin="dense" />
+                            <TextField 
+                             required
+                             error={errordescription}
+                             helperText={errordescription ? 'Description cannot be empty' : ''}
+                                value={info?.description}
+                                onChange={(e)=>{
+                                    setInfo({
+                                        ...info, description:e.target.value
+                                    })
+                                    setErrordescription(e.target.value.trim() === '');
+                                }}
+                                label="Description" variant="standard" fullWidth margin="dense" />
                             <TextField
+                             required
+                                value={info?.category}
+                                onChange={(e)=>{
+                                    setInfo({
+                                        ...info, category:e.target.value
+                                    })
+                                }}
                                 sx={{
                                     mt: 3
                                 }}
-                                id="outlined-select-currency"
                                 select
                                 label="Category"
                                 fullWidth
@@ -127,6 +218,7 @@ const Step2 = () => {
                                 ))}
                             </TextField>
                             <Button
+                                onClick={()=>handleSubmitForm()}
                                 variant="outlined"
                                 sx={{
                                     mt: 5

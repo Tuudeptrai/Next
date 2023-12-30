@@ -9,6 +9,7 @@ import * as React from 'react';
 import {useDropzone} from 'react-dropzone';
 import Step1 from "@/components/track/steps/step1";
 import Step2 from "@/components/track/steps/step2";
+import { useState } from "react";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -39,7 +40,11 @@ function CustomTabPanel(props: TabPanelProps) {
 
 const UploadPage = () => {
     const [value, setValue] = React.useState(0);
-   
+    const [ trackUpload , setTrackUpload] = useState({
+        fileName:"",
+        percent:0,
+        tracksUrl:""
+    });
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
@@ -59,10 +64,10 @@ const UploadPage = () => {
                     </Tabs>
                 </Box>
                 <CustomTabPanel value={value} index={0}>
-                    <Step1 />
+                    <Step1 setValue={setValue} setTrackUpload={setTrackUpload} trackUpload={trackUpload}/>
                 </CustomTabPanel>
                 <CustomTabPanel value={value} index={1}>
-                   <Step2/>
+                   <Step2  trackUpload={trackUpload}/>
                 </CustomTabPanel>
             </Box>
         </Container>
