@@ -3,21 +3,43 @@ import { useHasMounted } from '@/utils/customHook';
 import { Container } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
+import { useTrackContext } from '../lib/TrackWraper';
 
 const AppFooter = () => {
-    // console.log('ssss',`${process.env.NEXT_PUBLIC_BACKEND_URL}/tracks/hoidanit.mp3`);
-    const hasMounted = useHasMounted();
-    if(!hasMounted) return (<></>);
+    
+    // const hasMounted = useHasMounted();
+    // if(!hasMounted) return (<></>);
+   
+    const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
+    console.log('context track',currentTrack);
+    const playerRef = useRef(null);
+    if (playerRef?.current && currentTrack?.isPlaying === false) {
+        //@ts-ignore
+        playerRef?.current?.audio?.current?.pause();
+        }
+        if (playerRef?.current && currentTrack?.isPlaying === true) {
+        //@ts-ignore
+        playerRef?.current?.audio?.current?.play();
+        }
+       
     return (
         <>
         
             <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0,backgroundColor:"#F2F2F2" }}>
-            <Container sx={{display:"flex", gap:10}}>
+            <Container sx={{display:"flex", gap:10, ".rhap_main":{gap: "20px"}}}>
                 <AudioPlayer
-                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/tracks/hoidanit.mp3` }
+                ref={playerRef}
+                onPause={() => {
+                    setCurrentTrack({ ...currentTrack, isPlaying: false })
+                    }}
+                onPlay={() => {
+                    setCurrentTrack({ ...currentTrack, isPlaying: true })
+                    }}
+                layout='horizontal-reverse'
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/tracks/${currentTrack.trackUrl}` }
                     
                     volume={0.5}
                     style={{boxShadow:"unset", backgroundColor:"#F2F2F2"}}
@@ -29,8 +51,9 @@ const AppFooter = () => {
                     justifyContent: "center",
                     minWidth: 100
                     }}>
-                    <div style={{ color: "#ccc" }}>Eric</div>
-                    <div style={{ color: "black" }}>Who am I ?</div>
+                        <div style={{ color: "black" }}>{currentTrack.title}</div>
+                    <div style={{ color: "#ccc" }}>{currentTrack.description}</div>
+                    
                 </div>
              </Container>
             </AppBar>

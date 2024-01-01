@@ -70,4 +70,12 @@ declare global {
         fileName:string,
         percent:number
     }
+    interface ITrackContext{
+        
+        currentTrack: IshareTrack;
+        setCurrentTrack: (v:IshareTrack)=>void;
+    }
+    interface IshareTrack extends ITrackTop{
+        isPlaying:boolean;
+    }
 }
