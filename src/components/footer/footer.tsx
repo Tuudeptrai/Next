@@ -3,28 +3,29 @@ import { useHasMounted } from '@/utils/customHook';
 import { Container } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 import { useTrackContext } from '../lib/TrackWraper';
 
 const AppFooter = () => {
-    
-    // const hasMounted = useHasMounted();
-    // if(!hasMounted) return (<></>);
-   
     const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
-    console.log('context track',currentTrack);
     const playerRef = useRef(null);
-    if (playerRef?.current && currentTrack?.isPlaying === false) {
-        //@ts-ignore
-        playerRef?.current?.audio?.current?.pause();
+    const hasMounted = useHasMounted();
+    
+   
+    useEffect(() => {
+        if (currentTrack?.isPlaying === false) {
+            //@ts-ignore
+            playerRef?.current?.audio?.current?.pause();
         }
-        if (playerRef?.current && currentTrack?.isPlaying === true) {
-        //@ts-ignore
-        playerRef?.current?.audio?.current?.play();
+        if (currentTrack?.isPlaying === true) {
+            //@ts-ignore
+            playerRef?.current?.audio?.current?.play();
         }
-       
+    }, [currentTrack])
+    
+    if(!hasMounted) return (<></>);
     return (
         <>
         

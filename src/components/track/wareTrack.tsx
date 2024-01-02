@@ -8,13 +8,21 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import './wave.scss';
 import { Tooltip } from "@mui/material";
-
-const WaveTrack = () => {
+import { sendRequest } from "@/utils/Api";
+import { useTrackContext } from "../lib/TrackWraper";
+interface IProps {
+    track: IshareTrack | null;
+}
+const WaveTrack = (props:any) => {
+    const track = props;
+    const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
+   
+    
     const searchParams = useSearchParams()
     const fileName = searchParams.get('audio');
     const containerRef = useRef<HTMLDivElement>(null);
     const hoverRef = useRef<HTMLDivElement>(null);
-
+    
     const [time, setTime] = useState<string>("0:00");
     const [duration, setDuration] = useState<string>("0:00");
 
@@ -53,9 +61,37 @@ const WaveTrack = () => {
     }, []);
     const wavesurfer = useWavesurfer(containerRef, optionsMemo);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
+// Define a state to store the current time of Wavesurfer
+    const [currentWaveSurferTime, setCurrentWaveSurferTime] = useState(0);
 
-    // Initialize wavesurfer when the container mounts
-    // or any of the props change
+    const id = searchParams.get("id");
+   
+// sync track and wave song
+    useEffect(() => {
+     
+        if (track.track?._id && !currentTrack?._id)
+            setCurrentTrack({ ...track.track, isPlaying: false })
+    }, [track])
+   
+
+// On play button click
+        const onPlayClick = useCallback(() => {
+            if (wavesurfer) {
+                const isPlaying = wavesurfer.isPlaying();
+                isPlaying ? wavesurfer.pause() : wavesurfer.play();
+                setCurrentTrack(({ ...track.track, isPlaying: !isPlaying }));
+            }
+        }, [wavesurfer, setCurrentTrack]);
+
+        useEffect(() => {
+            if (currentTrack) {
+                currentTrack.isPlaying ? wavesurfer?.play() : wavesurfer?.pause();
+            }
+        }, [currentTrack, wavesurfer]);
+
+        
+
+
     useEffect(() => {
         if (!wavesurfer) return;
         setIsPlaying(false);
@@ -83,12 +119,7 @@ const WaveTrack = () => {
         }
     }, [wavesurfer])
 
-    // On play button click
-    const onPlayClick = useCallback(() => {
-        if (wavesurfer) {
-            wavesurfer.isPlaying() ? wavesurfer.pause() : wavesurfer.play();
-        }
-    }, [wavesurfer]);
+   
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60)
@@ -150,7 +181,10 @@ const WaveTrack = () => {
                     <div className="info" style={{ display: "flex" }}>
                         <div>
                             <div
-                                onClick={() => onPlayClick()}
+                                onClick={() =>{
+                                    onPlayClick()
+                                    
+                                } }
                                 style={{
                                     borderRadius: "50%",
                                     background: "#f50",
@@ -181,7 +215,7 @@ const WaveTrack = () => {
                                 width: "fit-content",
                                 color: "white"
                             }}>
-                                Hỏi Dân IT's song
+                                {track.track?.title }
                             </div>
                             <div style={{
                                 padding: "0 5px",
@@ -192,7 +226,7 @@ const WaveTrack = () => {
                                 color: "white"
                             }}
                             >
-                                Eric
+                                 {track.track?.description}
                             </div>
                         </div>
                     </div>
@@ -216,20 +250,7 @@ const WaveTrack = () => {
                             {
                                 arrComments.map(item => {
                                     return (
-                                        <Tooltip sx={{
-                                            visibility: "hidden",
-                                            width: "120px",
-                                            backgroundColor: "black",
-                                            color: "#fff",
-                                            textAlign: "center",
-                                            borderRadius: "6px",
-                                            padding: "5px 0",
-                                            position: "absolute",
-                                            zIndex: 1,
-                                            bottom: "150%",
-                                            left: "50%",
-                                            marginLeft:" -60px"
-                                        }} title={item.content} arrow>
+                                        <Tooltip  title={item.content} arrow key={item.id}>
                                              <img
                                             onPointerMove={(e) => {  const hover = hoverRef.current!;
                                             hover.style.width = calLeft(item.moment+3)
@@ -265,6 +286,7 @@ const WaveTrack = () => {
                         width: 250,
                         height: 250
                     }}>
+                    <img src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track.track?.imgUrl}`} width={250} height={250}/>
                     </div>
                 </div>
             </div>
