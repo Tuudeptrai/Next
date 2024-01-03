@@ -1,23 +1,33 @@
 'use client'
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useWavesurfer } from "@/utils/customHook";
 import { WaveSurferOptions } from 'wavesurfer.js';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import './wave.scss';
-import { Tooltip } from "@mui/material";
+import { Box, TextField, Tooltip } from "@mui/material";
 import { fetchDefaultImages, sendRequest } from "@/utils/Api";
 import { useTrackContext } from "../lib/TrackWraper";
+import { useSession } from "next-auth/react";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { ITrackComment } from "@/app/(user)/track/[slug]/page";
+
 interface IProps {
     track: IshareTrack | null;
 }
 const WaveTrack = (props:any) => {
-    const track = props;
-    const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
+    dayjs.extend(relativeTime)
+    const { data: session } = useSession() ;
     const { comments} = props;
-// console.log('comments',comments);
+    const track = props;
+    const [yourComment, setYourComment] = useState("");
+    const router = useRouter();
+    const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
+    
+console.log('comments',comments);
     
     const searchParams = useSearchParams()
     const fileName = searchParams.get('audio');
@@ -128,6 +138,36 @@ const WaveTrack = (props:any) => {
         const percent = (moment / hardCodeDuration) * 100;
         return `${percent}%`
     }
+    const handleSubmit = async () => {
+        try {
+          const res = await sendRequest<IBackendRes<ITrackComment>>({
+            url: 'http://localhost:8000/api/v1/comments',
+            method: 'POST',
+            body: {
+              content: yourComment,
+              moment: Math.round(wavesurfer?.getCurrentTime() ?? 0),
+              track: track.track?._id,
+            },
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`,
+            },
+          });
+          if (res.data) {
+            setYourComment('');
+            router.refresh();
+          }
+        } catch (error) {
+          console.error('Error submitting comment:', error);
+        }
+      };
+    const handleJumpTrack = (moment: number) => {
+    if (wavesurfer) {
+        const duration = wavesurfer.getDuration();
+        const seekPosition = moment / duration;
+        wavesurfer.seekTo(seekPosition);
+        wavesurfer.play();
+    }
+    };
 
     return (
         <div style={{ marginTop: 20 }}>
@@ -261,8 +301,86 @@ const WaveTrack = (props:any) => {
                     </div>
                 </div>
             </div>
-            <div>
-                asss
+            <div style={{ top:"20px", width: "100%", alignItems: "center" }}>
+            
+            </div>
+            <div style={{ top:"20px", width: "100%", alignItems: "center" }}>
+                    {session?.user && (
+                            <TextField
+                                value={yourComment}
+                                onChange={(e) => setYourComment(e.target.value)}
+                                fullWidth
+                                label="Comments"
+                                variant="standard"
+                                onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault(); 
+                                    handleSubmit();
+                                }
+                                }}
+                            />
+                            )}
+
+            </div>
+            <div style={{ display: "flex", gap: 15,   padding: 20,  height:"100%"  }}>
+                    <div className="left"
+                             style={{
+                                width: "25%",
+                                padding: 15,
+                                alignItems: "center"
+                            }}
+                        >
+                           <div>
+                           
+                            <img style={{ textAlign:"center",width: 150, height: 150,borderRadius:"50%"}} src=
+                                { //@ts-ignore
+                                fetchDefaultImages(session?.user?.type)
+                                }
+                            />
+                            </div>
+                          
+                           <div><p>{session?.user.email}</p></div>
+                           
+                        </div>
+                    <div className="right"
+                            style={{
+                                width: "75%",
+                                height: "calc(100% - 10px)",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between"
+                            }}
+                           
+                        >{
+                            comments.result.map((comment:any)=>{
+                                return (
+                                    
+                                    <Box key={comment._id} sx={{ display: "flex", gap: "10px", justifyContent:"space-between"}}>
+                                    <Box sx={{ display: "flex", gap: "10px", marginBottom: "25px", alignItems: "center" }}>
+                                        <img
+                                        style={{ height: 40, width: 40 }}
+                                        src={fetchDefaultImages(comment?.user?.type)}
+                                        />
+                                        <div>
+                                        <div style={{ fontSize: "13px" }}>
+                                           <span 
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => handleJumpTrack(comment.moment)}
+                                            > {comment?.user?.name ?? comment?.user?.email} at {formatTime(comment.moment)}
+                                            </span>
+                                        </div>
+                                        <div>{comment.content}</div>
+                                        </div>
+                                    </Box>
+                                    <div style={{ fontSize: "12px", color: "#999" }}>{dayjs(comment.createdAt)?.fromNow()}</div>
+                                    </Box>
+                                )
+                               
+                            })
+                        }
+                        
+
+                    </div>
             </div>
         </div >
         
@@ -270,3 +388,5 @@ const WaveTrack = (props:any) => {
 }
 
 export default WaveTrack;
+
+
