@@ -8,7 +8,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import './wave.scss';
 import { Tooltip } from "@mui/material";
-import { sendRequest } from "@/utils/Api";
+import { fetchDefaultImages, sendRequest } from "@/utils/Api";
 import { useTrackContext } from "../lib/TrackWraper";
 interface IProps {
     track: IshareTrack | null;
@@ -16,7 +16,8 @@ interface IProps {
 const WaveTrack = (props:any) => {
     const track = props;
     const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
-   
+    const { comments} = props;
+// console.log('comments',comments);
     
     const searchParams = useSearchParams()
     const fileName = searchParams.get('audio');
@@ -65,33 +66,6 @@ const WaveTrack = (props:any) => {
     const [currentWaveSurferTime, setCurrentWaveSurferTime] = useState(0);
 
     const id = searchParams.get("id");
-   
-// sync track and wave song
-    useEffect(() => {
-     
-        if (track.track?._id && !currentTrack?._id)
-            setCurrentTrack({ ...track.track, isPlaying: false })
-    }, [track])
-   
-
-// On play button click
-        const onPlayClick = useCallback(() => {
-            if (wavesurfer) {
-                const isPlaying = wavesurfer.isPlaying();
-                isPlaying ? wavesurfer.pause() : wavesurfer.play();
-                setCurrentTrack(({ ...track.track, isPlaying: !isPlaying }));
-            }
-        }, [wavesurfer, setCurrentTrack]);
-
-        useEffect(() => {
-            if (currentTrack) {
-                currentTrack.isPlaying ? wavesurfer?.play() : wavesurfer?.pause();
-            }
-        }, [currentTrack, wavesurfer]);
-
-        
-
-
     useEffect(() => {
         if (!wavesurfer) return;
         setIsPlaying(false);
@@ -119,7 +93,26 @@ const WaveTrack = (props:any) => {
         }
     }, [wavesurfer])
 
+    // On play button click
+    const onPlayClick = useCallback(() => {
+        if (wavesurfer) {
+            wavesurfer.isPlaying() ? wavesurfer.pause() : wavesurfer.play();
+        }
+    }, [wavesurfer]);
+
    
+
+    useEffect(() => {
+        if (wavesurfer && currentTrack.isPlaying) {
+            wavesurfer.pause();
+        }
+    }, [currentTrack])
+
+    useEffect(() => {
+        if (track.track?._id && !currentTrack?._id)
+            setCurrentTrack({ ...track.track, isPlaying: false })
+    }, [])
+
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60)
@@ -128,29 +121,7 @@ const WaveTrack = (props:any) => {
         return `${minutes}:${paddedSeconds}`
     }
 
-    const arrComments = [
-        {
-            id: 1,
-            avatar: "http://localhost:8000/images/chill1.png",
-            moment: 10,
-            user: "username 1",
-            content: "just a comment1"
-        },
-        {
-            id: 2,
-            avatar: "http://localhost:8000/images/chill1.png",
-            moment: 30,
-            user: "username 2",
-            content: "just a comment3"
-        },
-        {
-            id: 3,
-            avatar: "http://localhost:8000/images/chill1.png",
-            moment: 50,
-            user: "username 3",
-            content: "just a comment3"
-        },
-    ]
+   
 
     const calLeft = (moment: number) => {
         const hardCodeDuration = 199;
@@ -248,7 +219,7 @@ const WaveTrack = (props:any) => {
                             style={{ position: "relative" }}
                         >
                             {
-                                arrComments.map(item => {
+                              comments.result.map((item :any)=> {
                                     return (
                                         <Tooltip  title={item.content} arrow key={item.id}>
                                              <img
@@ -263,7 +234,7 @@ const WaveTrack = (props:any) => {
                                                 zIndex: 20,
                                                 left: calLeft(item.moment)
                                             }}
-                                            src={item.avatar}
+                                            src={fetchDefaultImages(item.user?.type)}
                                         />
                                         </Tooltip>
                                        
@@ -290,7 +261,11 @@ const WaveTrack = (props:any) => {
                     </div>
                 </div>
             </div>
+            <div>
+                asss
+            </div>
         </div >
+        
     )
 }
 
