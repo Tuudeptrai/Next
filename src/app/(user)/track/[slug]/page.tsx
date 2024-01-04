@@ -29,6 +29,8 @@ const DetailTrack = async(props:any) => {
     const res = await sendRequest<IBackendRes<IshareTrack>>({
         url: `http://localhost:8000/api/v1/tracks/${params.slug}`,
         method: "GET",
+        nextOption:{cache:"no-store"}
+
     })
     const res1 = await sendRequest<IBackendRes<IModelPaginate<ITrackComment>>>({
         url: `http://localhost:8000/api/v1/tracks/comments`,
@@ -41,7 +43,7 @@ const DetailTrack = async(props:any) => {
         },
       })
       
-    console.log('res>>>>>>>>>>>>>>',res1)
+    // console.log('res>>>>>>>>>>>>>>',res1)
     return (
        
           

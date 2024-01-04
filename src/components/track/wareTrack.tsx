@@ -14,6 +14,7 @@ import { useSession } from "next-auth/react";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { ITrackComment } from "@/app/(user)/track/[slug]/page";
+import LikeTrack from "./LikeTrack";
 
 interface IProps {
     track: IshareTrack | null;
@@ -27,13 +28,13 @@ const WaveTrack = (props:any) => {
     const router = useRouter();
     const {currentTrack , setCurrentTrack} = useTrackContext() as ITrackContext;
     
-console.log('comments',comments);
+    // console.log('track',track);
     
     const searchParams = useSearchParams()
     const fileName = searchParams.get('audio');
     const containerRef = useRef<HTMLDivElement>(null);
     const hoverRef = useRef<HTMLDivElement>(null);
-    
+    const firstView =  useRef(true);
     const [time, setTime] = useState<string>("0:00");
     const [duration, setDuration] = useState<string>("0:00");
 
@@ -169,6 +170,19 @@ console.log('comments',comments);
     }
     };
 
+    const  handleIncreaseView = async()=> {
+        if(firstView.current)
+            await sendRequest<IBackendRes<IModelPaginate<ITrackLike>>>({
+                url: "http://localhost:8000/api/v1/tracks/increase-view",
+                method: "POST",
+                body: {
+                  trackId: track.track?._id
+                }});
+                router.refresh();
+                firstView.current = false;
+        }
+     
+    
     return (
         <div style={{ marginTop: 20 }}>
             <div
@@ -193,8 +207,8 @@ console.log('comments',comments);
                         <div>
                             <div
                                 onClick={() =>{
-                                    onPlayClick()
-                                    
+                                    onPlayClick();
+                                    handleIncreaseView();
                                 } }
                                 style={{
                                     borderRadius: "50%",
@@ -302,7 +316,7 @@ console.log('comments',comments);
                 </div>
             </div>
             <div style={{ top:"20px", width: "100%", alignItems: "center" }}>
-            
+            <LikeTrack track={track.track}/>
             </div>
             <div style={{ top:"20px", width: "100%", alignItems: "center" }}>
                     {session?.user && (
