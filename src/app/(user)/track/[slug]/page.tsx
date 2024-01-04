@@ -2,6 +2,8 @@ import React from 'react';
 import WareTrack from '@/components/track/wareTrack';
 import { Container } from '@mui/material';
 import { sendRequest } from '@/utils/Api';
+import slugify from 'slugify';
+
 export interface ITrackComment{
     "_id": string,
     "content": string,
@@ -24,10 +26,11 @@ export interface ITrackComment{
     "updatedAt": string
 }
 const DetailTrack = async(props:any) => {
+   
     const { params } = props;
 
     const res = await sendRequest<IBackendRes<IshareTrack>>({
-        url: `http://localhost:8000/api/v1/tracks/${params.slug}`,
+        url: `http://localhost:8000/api/v1/tracks/${params.slug.split('_')[1]}`,
         method: "GET",
         nextOption:{cache:"no-store"}
 
@@ -38,11 +41,11 @@ const DetailTrack = async(props:any) => {
         queryParams: {
           current: 1,
           pageSize: 100,
-          trackId: params.slug,
+          trackId: params.slug.split('_')[1],
           sort: "-createdAt"
         },
       })
-      
+    //   console.log('slugtify',params.slug);
     // console.log('res>>>>>>>>>>>>>>',res1)
     return (
        

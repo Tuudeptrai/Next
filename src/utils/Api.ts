@@ -83,4 +83,18 @@ export const fetchDefaultImages = (type: string) => {
     if (type === "GOOGLE") return "/user/default-google.png";
     return "/user/default-user.png";
   };
+
+  import slugify from 'slugify';
+
+  export const convertSlugUrl = (str: string): string => {
+      if (!str) return "";
+  
+      str = slugify(str, {
+          lower: true,
+          locale: 'vi'
+      });
+  
+      return str;
+  };
+  
   

@@ -8,6 +8,7 @@ import Slider from "react-slick";
 import { Settings } from 'react-slick';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import Link from 'next/link';
+import { convertSlugUrl } from '@/utils/Api';
 
 interface Iprops{
     data:ITrackTop[],
@@ -62,7 +63,33 @@ const MainSlider = (props:Iprops) => {
         slidesToShow: 6,
       slidesToScroll: 6,
       nextArrow: <NextArrow />,
-      prevArrow: <PrevArrow />
+      prevArrow: <PrevArrow />,
+      responsive: [
+        {
+        breakpoint: 1024,
+        settings: {
+        slidesToShow: 3,
+        slidesToScroll: 3,
+        infinite: true,
+        dots: true
+        }
+        },
+        {
+        breakpoint: 600,
+        settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+        initialSlide: 2
+        }
+        },
+        {
+        breakpoint: 480,
+        settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1
+        }
+        }
+        ]
       };
       return (
         <Container>
@@ -96,7 +123,7 @@ const MainSlider = (props:Iprops) => {
                         <div className="track" key={track._id}>
                          <img
                             src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track.imgUrl}`}/>
-                            <Link href={`/track/${track._id}?audio=${track.trackUrl}&id=${track._id}`}>
+                            <Link href={`/track/${convertSlugUrl(track.title)}_${track._id}?audio=${track.trackUrl}`}>
                             <h4>{track.title}</h4>
                             <h5>{track.description}</h5>
                             </Link>
